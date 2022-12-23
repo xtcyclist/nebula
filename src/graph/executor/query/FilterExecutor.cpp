@@ -65,7 +65,9 @@ StatusOr<DataSet> FilterExecutor::handleJob(size_t begin, size_t end, Iterator *
   for (; iter->valid() && begin++ < end; iter->next()) {
     auto val = condition->eval(ctx(iter));
     if (val.isBadNull() || (!val.empty() && !val.isImplicitBool() && !val.isNull())) {
-      return Status::Error("Wrong type result, the type should be NULL, EMPTY, BOOL");
+      return Status::Error("Failed to evaluate condition: %s. %s",
+                           condition->toString().c_str(),
+                           "For boolean conditions, please write <condition> == <true/false>.");
     }
     if (!(val.empty() || val.isNull() || (val.isImplicitBool() && !val.implicitBool()))) {
       // TODO: Maybe we can move.
@@ -96,7 +98,9 @@ Status FilterExecutor::handleSingleJobFilter() {
     while (iter->valid()) {
       auto val = condition->eval(ctx(iter));
       if (val.isBadNull() || (!val.empty() && !val.isImplicitBool() && !val.isNull())) {
-        return Status::Error("Wrong type result, the type should be NULL, EMPTY, BOOL");
+        return Status::Error("Failed to evaluate condition: %s. %s",
+                             condition->toString().c_str(),
+                             "For boolean conditions, please write <condition> == <true/false>.");
       }
       if (val.empty() || val.isNull() || (val.isImplicitBool() && !val.implicitBool())) {
         if (UNLIKELY(filter->needStableFilter())) {
@@ -119,7 +123,9 @@ Status FilterExecutor::handleSingleJobFilter() {
     for (; iter->valid(); iter->next()) {
       auto val = condition->eval(ctx(iter));
       if (val.isBadNull() || (!val.empty() && !val.isImplicitBool() && !val.isNull())) {
-        return Status::Error("Wrong type result, the type should be NULL, EMPTY, BOOL");
+        return Status::Error("Failed to evaluate condition: %s. %s",
+                             condition->toString().c_str(),
+                             "For boolean conditions, please write <condition> == <true/false>.");
       }
       if (val.isImplicitBool() && val.implicitBool()) {
         Row row;
